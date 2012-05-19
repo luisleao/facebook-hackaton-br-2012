@@ -191,8 +191,8 @@ Author: Luis Leao (luisleao@gmail.com)
       
 
 			function verifyUI(response) {
-			  console.log("verifyUI");
-			  console.debug(response);
+			  //console.log("verifyUI");
+			  //console.debug(response);
 				if (response.status == "connected") {
 				  
 				  FB.api("/me?fields=first_name, name", function(response){
@@ -271,6 +271,10 @@ Author: Luis Leao (luisleao@gmail.com)
       
  			FB.api("/me/questions?limit=100", function(response){
         $("#questions ol").empty();
+        
+        if (response.data.length == 0) {
+          $("#questions ol").append($("<li><strong>You don't have no questions in your timeline and the questions must have only 2 choices!</strong></li>"));
+        }
         
  				$(response.data).each(function(index, val){
  				  if (val.options.data.length != 2)
