@@ -6,7 +6,7 @@ proxy.py
 Created by Luís Leao and Sam Carecho on 2012-05-18.
 """
 
-TEMPO = 2.0
+TEMPO = 20.0
 
 import sys
 import os
@@ -43,7 +43,9 @@ def callback_timer():
             print "Received data:"
             option_0 = float(question["options"]["data"][0]["votes"])
             option_1 = float(question["options"]["data"][1]["votes"])
-            perc = int((option_1 / (option_0 + option_1)) * 100)
+            perc = 50
+            if int(option_0 + option_1) > 0:
+                perc = int((option_1 / (option_0 + option_1) * 100))
             print question["question"]
             print "%04d;%04d;%04d\n" % (option_0, option_1, perc)
             ser.write("%04d;%04d;%04d\n" % (option_0, option_1, perc))
