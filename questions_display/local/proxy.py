@@ -14,17 +14,23 @@ import threading
 
 
 question_data = {}
+t = None
 
 def callback_timer():
     global question_data    # Needed to modify global copy of globvar
+    global t
     
     print "callback timer"
     print question_data
     #TODO: receive facebook question id and access_token, put in a variable and set a timer to get data and send to arduino
-    threading.Timer(5.0, callback_timer).start()
+    t = threading.Timer(5.0, callback_timer).start()
 
 def receive(message):
     global question_data    # Needed to modify global copy of globvar
+    global t
+    if t:
+        t.cancel()
+    
     question_data = message
     callback_timer()
     return True
