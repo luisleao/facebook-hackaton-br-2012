@@ -6,33 +6,74 @@ proxy.py
 Created by Luís Leao and Sam Carecho on 2012-05-18.
 """
 
+TEMPO = 2.0
+
 import sys
 import os
 
 from Pubnub import Pubnub
 import threading
+import serial
+import facebook
 
 
-question_data = {}
+question_data = None
+ser = serial.Serial("/dev/tty.usbmodem411", 9600) #'/dev/tty.usbserial', 9600
 t = None
+data = False
+
 
 def callback_timer():
-    global question_data    # Needed to modify global copy of globvar
-    global t
+    global ser, question_data, data, t
+    #print t
+    print "CALLBACK access_token: %s." % question_data["access_token"]
     
-    print "callback timer"
-    print question_data
+    t = None
+    if not question_data["access_token"] is None: 
+        #print "tem token!"
+        
+        graph = facebook.GraphAPI(question_data["access_token"])
+        #profile = graph.get_object("/me?fields=name")
+        question = graph.get_object("/%s" % question_data["question"])
+        #		#		{'from': {'name': 'Luis Leao', 'id': '1246666609'}, 
+        #		#'question': 'Hackaton do Facebook', 'id': '4024899541327', 'created_time': '2012-05-19T03:58:23+0000', 'updated_time': '2012-05-19T03:58:24+0000', 
+        #		'options': {'data': [{'created_time': '2012-05-19T03:58:23+0000', 'votes': 1, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '297653190321494', 'name': 'Uso Arduino'}, {'created_time': '2012-05-19T03:58:22+0000', 'votes': 0, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '310404559041849', 'name': 'N\xc3O uso Arduino'}]}}
+        if "options" in question:
+            print "tem options!!!"
+            option_0 = float(question["options"]["data"][0]["votes"])
+            option_1 = float(question["options"]["data"][1]["votes"])
+            perc = int((option_1c / (option_0 + option_1)) * 100)
+            print question["question"]
+            print "%04d;%04d;%04d\n" % (option_0, option_1, perc)
+            ser.write("%04d;%04d;%04d\n" % (option_0, option_1, perc))
+
+        #print profile
+        #print question
+    
+    #if data == True:
+    #    ser.write("1234;5678;0010\n")
+    #else:
+    #    ser.write("9876;2891;0090\n")
+    
+    #data = not data
+    #t.cancel()
+    t = threading.Timer(TEMPO, callback_timer)
+    t.start()
+    
     #TODO: receive facebook question id and access_token, put in a variable and set a timer to get data and send to arduino
-    t = threading.Timer(5.0, callback_timer).start()
+    
+
+
 
 def receive(message):
-    global question_data    # Needed to modify global copy of globvar
-    global t
-    if t:
-        t.cancel()
-    
+    global question_data, t
+    print "receive"
     question_data = message
+    if t:
+        print "cancelling timer..."
+        t.cancel()
     callback_timer()
+
     return True
 
 
@@ -47,6 +88,10 @@ def receive(message):
 
 def main():
 	print "started"
+	global t
+	t = threading.Timer(TEMPO, callback_timer)
+	t.start()
+	
 	
 	pubnub = Pubnub(
 	    "pub-e10385fe-9f9f-46a4-b969-f3c8ba11ff59",  ## PUBLISH_KEY
