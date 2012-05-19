@@ -1,0 +1,313 @@
+
+
+<!DOCTYPE html>
+<!--
+Author: Luis Leao (luisleao@gmail.com)
+-->
+
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="css/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
+  <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+
+  <style>
+
+    body, p {
+      font-weight: 400 !important;
+      font-family: 'Droid Sans', sans-serif !important;
+    }
+
+    #top_container {
+      position: relative;
+    }
+
+    #full {
+      margin-top: 200px;
+    }
+
+    h1 {
+      position: absolute;
+      top: 50px;
+      margin: 0;
+      padding: 0;
+      text-transform: none;
+      font-size: 16pt;
+    }
+    h1 span {
+      font-weight: 700;
+      text-transform: none;
+      font-size: 32pt;
+      display: block;
+    }
+    
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    #login, #questions, #end {
+      display: none;
+    }
+
+    input.upper { text-transform: uppercase; }
+
+    .question_text, .user {
+      font-weight: 700;
+      font-size: 12pt;
+    }
+    
+    #questions ol {
+      margin-bottom: 0;
+    }
+
+    #questions ol li {
+      font-size: 12pt;
+      padding: 5px;
+    }
+    #questions ol li:hover {
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+  </style>
+  
+</head>
+<body>
+
+  
+  <div id="fb-root"></div>
+  
+  
+  <div id="top_container" class="container">
+		<h1>Facebook Brazilian Hackaton <span>Questions Display</span></h1>
+    
+		<div class="row" id="full">
+			
+			<div class="span3">
+				<div class="well">
+					<p>Welcome to <b>Queue Display</b>!</p>
+					<p>Connect with Facebook and choose your question to be displayed in out device.</p>
+				</div>
+			</div>
+			<div class="span8 offset1" style="position: relative">
+			
+			  <section id="login">
+			    <h2>Activate your account</h2>
+			    <p>Your need to user Facebook Connect and authorize our app to list your questions.</p>
+			    <a href="#" id="btn_login" class="btn btn-primary btn-large">Connect with Facebook</a>
+			    
+			  </section>
+
+			  <section id="questions">
+			    <h2>Select one of your questions.</h2>
+			    <p>Welcome <span class="user">USER</span>!</p>
+			    <p>Select one question bellow to send results to the device:</p>
+			    <div class="well">
+  			    <ol></ol>
+			    </div>
+			    
+			    <button id="btn_refresh" data-loading-text="loading..." class="btn btn-primary btn-mini"><i class="icon-refresh icon-white"></i> refresh question's list</button>
+			  </section>
+
+			  <section id="end">
+			    <h2>View results in realtime.</h2>
+			    
+			    <p>The results for <span class="question_text">QUESTION</span> will be displayed.</p>
+			    <p>&nbsp;</p>
+			    <a href="#" id="btn_change_question" class="btn btn-primary"><i class="icon-chevron-left icon-white"></i> select another question</a>
+			  </section>
+
+			
+			</div>
+			
+			
+		</div>
+	</div>
+	
+  
+  
+  
+  
+  
+  
+  <div pub-key="pub-e10385fe-9f9f-46a4-b969-f3c8ba11ff59" sub-key="sub-f8f2ff3a-a176-11e1-bbc1-f151a023fb9a" ssl="off" origin="pubsub.pubnub.com" id="pubnub"></div>
+  <script src="js/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
+  <!--  <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script> -->
+  <script src="js/bootstrap-button.js" type="text/javascript" charset="utf-8"></script>
+  <script src="http://cdn.pubnub.com/pubnub-3.1.min.js"></script>
+  
+  <script>
+  
+    var last_question_id = "";
+    var last_question_text = "";
+  
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '228946857220440', // App ID
+        status     : true, // check login status
+        cookie     : true, // enable cookies to allow the server to access the session
+        xfbml      : true  // parse XFBML
+      });
+
+      // Additional initialization code here
+      PUBNUB.subscribe({
+        channel  : "fbhackaton_newquestion",
+        callback : function(message) {
+          alert("new message");
+          console.debug(message);
+        },
+        error: function(e) {
+          console.log(e);
+        }
+      });
+      
+      
+      $("#btn_login").click(function(e){
+        e.preventDefault();
+        FB.login(function(response) {
+           verifyUI(response);
+         }, {scope: "user_questions"});
+      });
+
+      // change question
+      $("#btn_change_question").click(function(e){
+        e.preventDefault();
+        $("#end").fadeOut("slow", function(){
+          $("#questions").fadeIn();
+        });
+      });
+      
+      $("#btn_refresh").click(function(e){
+        e.preventDefault();
+        $(this).button("loading");
+        getQuestions();
+      });
+      
+      
+      //TODO: initialize facebook
+      
+      //TODO: verify if user is authenticated
+      //TODO: get user pools
+      //TODO: publish pubnub pool id + access_token
+      
+      
+      
+
+			function verifyUI(response) {
+			  console.log("verifyUI");
+			  console.debug(response);
+				if (response.status == "connected") {
+					//TODO: exibir section 2
+					$("#login").fadeOut();
+					$("#questions").fadeIn();
+					$("#end").hide();
+					
+					
+					//TODO: change .user
+					
+					
+  				if (response.status == "connected") {
+  					getQuestions();
+  				}
+					
+				} else {
+					if (!$("#login").is(":visible")) {
+  					$("#end").hide();
+  					$("#questions").fadeOut("slow", function(){
+    					$("#login").fadeIn();
+  					});
+					}
+				}
+
+			}
+
+
+      //TEST
+      /*
+      var message = { pool: "1234", access_token: "abcd"};
+      PUBNUB.publish({
+        channel: "fbhackaton_newquestion",
+        message: message,
+      });
+      */
+
+
+      FB.Event.subscribe("auth.login", function(response) {
+      	verifyUI(response);
+			});
+
+
+			FB.Event.subscribe('auth.authResponseChange', function(response) {
+				verifyUI(response);
+			});
+
+
+			// se o usuario ja tiver autorizado o aplicativo, necessario logar novamente
+			FB.getLoginStatus(function(response){
+				verifyUI(response);
+			});
+
+
+
+      
+    };
+
+    // Load the SDK Asynchronously
+    (function(d){
+       var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+       if (d.getElementById(id)) {return;}
+       js = d.createElement('script'); js.id = id; js.async = true;
+       js.src = "//connect.facebook.net/en_US/all.js";
+       ref.parentNode.insertBefore(js, ref);
+     }(document));
+     
+     
+     
+ 		function getQuestions() {
+      
+ 			FB.api("/me/questions?limit=100", function(response){
+        $("#questions ol").empty();
+        
+ 				$(response.data).each(function(index, val){
+ 				  if (val.options.data.length != 2)
+ 				    return;
+ 				    
+ 				  var question_id = val.id;
+ 				  var question_text = val.question;
+ 				  var new_element = $("<li></li>").attr("id", "question_" + question_id).text(question_text);
+ 				  new_element.click(function(){
+ 				    var question_id = $(this).attr("id").split("_")[1];
+ 				    
+ 				    last_question_id = question_id;
+            last_question_text = $(this).text();
+            
+ 				    var message = { question: question_id, access_token: FB.getAccessToken()};
+            PUBNUB.publish({
+              channel: "fbhackaton_newquestion",
+              message: message,
+            });
+            $("#questions").fadeOut("slow", function(){
+              $(".question_text").text(last_question_text);
+              $("#end").fadeIn()
+            });
+ 				  });
+ 				  $("#questions ol").append(new_element);
+        });
+        $("#btn_refresh").button("reset");
+        
+ 			});
+ 		}
+
+     
+     
+  </script>
+  
+  
+
+
+  
+  
+  
+  
+</body>
+</html>
