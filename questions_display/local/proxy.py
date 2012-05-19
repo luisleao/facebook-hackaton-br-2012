@@ -18,7 +18,7 @@ import facebook
 
 
 question_data = None
-ser = serial.Serial("/dev/tty.usbmodem411", 9600) #'/dev/tty.usbserial', 9600
+ser = serial.Serial("/dev/tty.usbmodem411", 9600) #621
 t = None
 data = False
 
@@ -26,10 +26,10 @@ data = False
 def callback_timer():
     global ser, question_data, data, t
     #print t
-    print "CALLBACK access_token: %s." % question_data["access_token"]
+    #print "CALLBACK access_token: %s." % question_data["access_token"]
     
     t = None
-    if not question_data["access_token"] is None: 
+    if question_data and "access_token" in question_data: 
         #print "tem token!"
         
         graph = facebook.GraphAPI(question_data["access_token"])
@@ -39,28 +39,18 @@ def callback_timer():
         #		#'question': 'Hackaton do Facebook', 'id': '4024899541327', 'created_time': '2012-05-19T03:58:23+0000', 'updated_time': '2012-05-19T03:58:24+0000', 
         #		'options': {'data': [{'created_time': '2012-05-19T03:58:23+0000', 'votes': 1, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '297653190321494', 'name': 'Uso Arduino'}, {'created_time': '2012-05-19T03:58:22+0000', 'votes': 0, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '310404559041849', 'name': 'N\xc3O uso Arduino'}]}}
         if "options" in question:
-            print "tem options!!!"
+            print question
+            print "Received data:"
             option_0 = float(question["options"]["data"][0]["votes"])
             option_1 = float(question["options"]["data"][1]["votes"])
-            perc = int((option_1c / (option_0 + option_1)) * 100)
+            perc = int((option_1 / (option_0 + option_1)) * 100)
             print question["question"]
             print "%04d;%04d;%04d\n" % (option_0, option_1, perc)
             ser.write("%04d;%04d;%04d\n" % (option_0, option_1, perc))
-
-        #print profile
-        #print question
     
-    #if data == True:
-    #    ser.write("1234;5678;0010\n")
-    #else:
-    #    ser.write("9876;2891;0090\n")
-    
-    #data = not data
-    #t.cancel()
     t = threading.Timer(TEMPO, callback_timer)
     t.start()
     
-    #TODO: receive facebook question id and access_token, put in a variable and set a timer to get data and send to arduino
     
 
 

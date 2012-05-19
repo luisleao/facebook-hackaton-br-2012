@@ -21,9 +21,9 @@ void setup() {
   led2.begin(9600);
   
   led1.print((char)0x76);
-  led1.print("1234");
+  led1.print("    ");
   led2.print((char)0x76);
-  led2.print("5678");
+  led2.print("    ");
 
 
   pinMode(3, OUTPUT);
