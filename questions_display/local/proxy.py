@@ -45,7 +45,7 @@ def callback_timer():
             option_0 = 0;
             option_1 = 0;
             for option in question["options"]["data"]:
-                print option
+                #print option
                 if option["id"] == question_data["option_0"]:
                     print "found opt0"
                     option_0 = float(option["votes"])
