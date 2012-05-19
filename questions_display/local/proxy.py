@@ -8,15 +8,25 @@ Created by Luís Leao and Sam Carecho on 2012-05-18.
 
 import sys
 import os
+
 from Pubnub import Pubnub
+import threading
 
 
+question_data = {}
 
+def callback_timer():
+    global question_data    # Needed to modify global copy of globvar
+    
+    print "callback timer"
+    print question_data
+    #TODO: receive facebook question id and access_token, put in a variable and set a timer to get data and send to arduino
+    threading.Timer(5.0, callback_timer).start()
 
 def receive(message):
-    print "new message"
-    print(message)
-    #TODO: receive facebook question id and access_token, put in a variable and set a timer to get data and send to arduino
+    global question_data    # Needed to modify global copy of globvar
+    question_data = message
+    callback_timer()
     return True
 
 

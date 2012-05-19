@@ -7,6 +7,7 @@ Author: Luis Leao (luisleao@gmail.com)
 
 <html>
 <head>
+  <title>Facebook Brazilian Hackaton 2012 - Questions Display</title>
   <meta charset="utf-8" />
   <link rel="stylesheet" href="css/bootstrap.css" type="text/css" media="screen" title="no title" charset="utf-8">
   <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -55,7 +56,9 @@ Author: Luis Leao (luisleao@gmail.com)
       font-weight: 700;
       font-size: 12pt;
     }
-    
+    .user {
+      display: none;
+    }
     #questions ol {
       margin-bottom: 0;
     }
@@ -79,7 +82,7 @@ Author: Luis Leao (luisleao@gmail.com)
   
   
   <div id="top_container" class="container">
-		<h1>Facebook Brazilian Hackaton <span>Questions Display</span></h1>
+		<h1>Facebook Brazilian Hackaton 2012<span>Questions Display</span></h1>
     
 		<div class="row" id="full">
 			
@@ -150,6 +153,8 @@ Author: Luis Leao (luisleao@gmail.com)
       });
 
       // Additional initialization code here
+      
+      /*
       PUBNUB.subscribe({
         channel  : "fbhackaton_newquestion",
         callback : function(message) {
@@ -160,7 +165,7 @@ Author: Luis Leao (luisleao@gmail.com)
           console.log(e);
         }
       });
-      
+      */
       
       $("#btn_login").click(function(e){
         e.preventDefault();
@@ -184,19 +189,18 @@ Author: Luis Leao (luisleao@gmail.com)
       });
       
       
-      //TODO: initialize facebook
-      
-      //TODO: verify if user is authenticated
-      //TODO: get user pools
-      //TODO: publish pubnub pool id + access_token
-      
-      
-      
 
 			function verifyUI(response) {
 			  console.log("verifyUI");
 			  console.debug(response);
 				if (response.status == "connected") {
+				  
+				  FB.api("/me?fields=first_name, name", function(response){
+				    //console.debug(response); 
+				    $(".user").text(response.first_name);
+				    $(".user").show();
+				  });
+				  
 					//TODO: exibir section 2
 					$("#login").fadeOut();
 					$("#questions").fadeIn();
