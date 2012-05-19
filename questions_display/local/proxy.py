@@ -25,37 +25,20 @@ data = False
 
 def callback_timer():
     global ser, question_data, data, t
-    #print t
-    #print "CALLBACK access_token: %s." % question_data["access_token"]
-    
     t = None
     if question_data and "access_token" in question_data: 
-        #print "tem token!"
-        #print question_data
-        #print ""
-        
         graph = facebook.GraphAPI(question_data["access_token"])
-        #profile = graph.get_object("/me?fields=name")
         question = graph.get_object("/%s" % question_data["question"])
-        #		#		{'from': {'name': 'Luis Leao', 'id': '1246666609'}, 
-        #		#'question': 'Hackaton do Facebook', 'id': '4024899541327', 'created_time': '2012-05-19T03:58:23+0000', 'updated_time': '2012-05-19T03:58:24+0000', 
-        #		'options': {'data': [{'created_time': '2012-05-19T03:58:23+0000', 'votes': 1, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '297653190321494', 'name': 'Uso Arduino'}, {'created_time': '2012-05-19T03:58:22+0000', 'votes': 0, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '310404559041849', 'name': 'N\xc3O uso Arduino'}]}}
         if "options" in question:
-            #print question
             option_0 = 0;
             option_1 = 0;
             for option in question["options"]["data"]:
-                #print option
                 if option["id"] == question_data["option_0"]:
-                    print "found opt0"
                     option_0 = float(option["votes"])
                 if option["id"] == question_data["option_1"]:
-                    print "found opt1"
                     option_1 = float(option["votes"])
             
             print "Received data!"
-            #option_0 = float(question["options"]["data"][0]["votes"])
-            #option_1 = float(question["options"]["data"][1]["votes"])
             perc = 50
             if int(option_0 + option_1) > 0:
                 perc = int((option_1 / (option_0 + option_1) * 100))
@@ -72,17 +55,16 @@ def callback_timer():
 
 def receive(message):
     global question_data, t
-    print "receive"
+    print "received new PubNub message"
     question_data = message
     if t:
-        print "cancelling timer..."
         t.cancel()
     callback_timer()
 
     return True
 
 
-
+# if you need to send a message
 #	history = pubnub.history({
 #	    'channel' : 'hello_world',
 #	    'limit'   : 1
@@ -105,21 +87,11 @@ def main():
 	    False
 	)
 	
-#	info = pubnub.publish({
-#	    'channel' : 'fbhackaton_newquestion',
-#	    'message' : {
-#	        'some_text' : 'Hello my World'
-#	    }
-#	})
-#	print(info)
-
 	print("subscribing...")
 	pubnub.subscribe({
 	    'channel'  : 'fbhackaton_newquestion',
 	    'callback' : receive 
 	})
-#	print(info)
-#	print "main complete"
 
 
 if __name__ == '__main__':
