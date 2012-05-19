@@ -6,7 +6,7 @@ proxy.py
 Created by Luís Leao and Sam Carecho on 2012-05-18.
 """
 
-TEMPO = 20.0
+TEMPO = 3.0
 
 import sys
 import os
@@ -31,6 +31,8 @@ def callback_timer():
     t = None
     if question_data and "access_token" in question_data: 
         #print "tem token!"
+        #print question_data
+        #print ""
         
         graph = facebook.GraphAPI(question_data["access_token"])
         #profile = graph.get_object("/me?fields=name")
@@ -39,10 +41,21 @@ def callback_timer():
         #		#'question': 'Hackaton do Facebook', 'id': '4024899541327', 'created_time': '2012-05-19T03:58:23+0000', 'updated_time': '2012-05-19T03:58:24+0000', 
         #		'options': {'data': [{'created_time': '2012-05-19T03:58:23+0000', 'votes': 1, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '297653190321494', 'name': 'Uso Arduino'}, {'created_time': '2012-05-19T03:58:22+0000', 'votes': 0, 'from': {'name': 'Luis Leao', 'id': '1246666609'}, 'id': '310404559041849', 'name': 'N\xc3O uso Arduino'}]}}
         if "options" in question:
-            print question
-            print "Received data:"
-            option_0 = float(question["options"]["data"][0]["votes"])
-            option_1 = float(question["options"]["data"][1]["votes"])
+            #print question
+            option_0 = 0;
+            option_1 = 0;
+            for option in question["options"]["data"]:
+                print option
+                if option["id"] == question_data["option_0"]:
+                    print "found opt0"
+                    option_0 = float(option["votes"])
+                if option["id"] == question_data["option_1"]:
+                    print "found opt1"
+                    option_1 = float(option["votes"])
+            
+            print "Received data!"
+            #option_0 = float(question["options"]["data"][0]["votes"])
+            #option_1 = float(question["options"]["data"][1]["votes"])
             perc = 50
             if int(option_0 + option_1) > 0:
                 perc = int((option_1 / (option_0 + option_1) * 100))

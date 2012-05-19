@@ -130,9 +130,6 @@ Author: Luis Leao (luisleao@gmail.com)
   
   
   
-  
-  
-  
   <div pub-key="pub-e10385fe-9f9f-46a4-b969-f3c8ba11ff59" sub-key="sub-f8f2ff3a-a176-11e1-bbc1-f151a023fb9a" ssl="off" origin="pubsub.pubnub.com" id="pubnub"></div>
   <script src="js/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
   <!--  <script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script> -->
@@ -281,15 +278,25 @@ Author: Luis Leao (luisleao@gmail.com)
  				    return;
  				    
  				  var question_id = val.id;
- 				  var question_text = val.question;
- 				  var new_element = $("<li></li>").attr("id", "question_" + question_id).text(question_text);
+ 				  var question_text = "<strong>" + val.question + "</strong><br/>";
+ 				  
+ 				  var option_0 = val.options.data[0].id;
+ 				  var option_1 = val.options.data[1].id;
+ 				  var option_0_text = val.options.data[0].name;
+ 				  var option_1_text = val.options.data[1].name;
+ 				  
+ 				  
+ 				  var new_element = $("<li></li>").attr("id", "question_" + question_id + "_" + option_0 + "_" + option_1).append(question_text + "" + option_0_text + " or " + option_1_text + "");
  				  new_element.click(function(){
- 				    var question_id = $(this).attr("id").split("_")[1];
+ 				    var question = $(this).attr("id").split("_");
+ 				    var question_id = question[1];
+   				  var option_0 = question[2];
+   				  var option_1 = question[3];
  				    
  				    last_question_id = question_id;
-            last_question_text = $(this).text();
+            last_question_text = $(this).children("strong").text();
             
- 				    var message = { question: question_id, access_token: FB.getAccessToken()};
+ 				    var message = { question: question_id, access_token: FB.getAccessToken(), option_0: option_0, option_1: option_1 };
             PUBNUB.publish({
               channel: "fbhackaton_newquestion",
               message: message,
